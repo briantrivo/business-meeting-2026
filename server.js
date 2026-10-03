@@ -8,14 +8,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'astronixa2026';
 const DATA_FILE = path.join(__dirname, 'data', 'leads.json');
-const GOOGLE_SHEET_WEBHOOK_URL = process.env.GOOGLE_SHEET_WEBHOOK_URL || '';
+const GOOGLE_SHEET_WEBHOOK_URL = process.env.GOOGLE_SHEET_WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbwlYK0UcsFwZStFfjWhMUcT-62HDwJx32_kCtYfuaNYqnI9ebD9T1lOzkGu9PYkBSRX/exec';
 
 // Helper: Forward lead data to Google Sheet Webhook
 async function forwardToGoogleSheet(lead) {
   if (!GOOGLE_SHEET_WEBHOOK_URL) return;
   try {
     const payload = {
-      time: new Date(lead.received_at).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
+      time: new Date(lead.received_at || Date.now()).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
       full_name: lead.full_name,
       phone: lead.phone,
       email: lead.email,
@@ -28,22 +28,14 @@ async function forwardToGoogleSheet(lead) {
     };
 
     if (typeof fetch === 'function') {
-      await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+      const resp = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        redirect: 'follow'
       });
-      console.log('✅ Forwarded lead to Google Sheet successfully:', lead.full_name);
-    } else {
-      const https = require('https');
-      const url = new URL(GOOGLE_SHEET_WEBHOOK_URL);
-      const req = https.request(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      req.on('error', (e) => console.error('Google Sheet Webhook error:', e.message));
-      req.write(JSON.stringify(payload));
-      req.end();
+      const text = await resp.text();
+      console.log('✅ Forwarded lead to Google Sheet:', lead.full_name, 'Response:', text.substring(0, 100));
     }
   } catch (err) {
     console.error('Google Sheet forward failed:', err.message);
@@ -107,7 +99,7 @@ app.get('/api/config', (req, res) => {
 });
 
 // API: Register Lead (Submit Form)
-app.post('/api/register', (req, res) => {
+app.post('/api/register', async (req, res) => {
   try {
     const body = req.body || {};
     
@@ -160,8 +152,8 @@ app.post('/api/register', (req, res) => {
     leads.unshift(newLead);
     saveLeads(leads);
 
-    // Asynchronously forward to Google Sheet if configured
-    forwardToGoogleSheet(newLead);
+    // Forward to Google Sheet Webhook
+    await forwardToGoogleSheet(newLead);
 
     res.json({
       ok: true,
