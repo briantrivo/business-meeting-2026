@@ -1050,6 +1050,9 @@
       position: relative;
       overflow: hidden;
     }
+    .speaker-card + .speaker-card {
+      margin-top: 32px;
+    }
     .speaker-card::before {
       content: "";
       position: absolute;
@@ -1896,10 +1899,11 @@
     <div class="sec speaker-sec" id="dien-gia">
       <div class="speaker-header">
         <div class="speaker-pill">🎙️ SPEAKER CHƯƠNG TRÌNH</div>
-        <h2 class="speaker-title">CHUYÊN GIA VÕ QUỐC <span class="sp-name-highlight">TRÍ</span></h2>
-        <p class="speaker-sub">Giám Đốc Phát Triển Thị Trường Astronixa Việt Nam — trực tiếp đồng hành, định hướng chiến lược và hỗ trợ bạn xây dựng dòng thu nhập bền vững.</p>
+        <h2 class="speaker-title">DIỄN GIẢ &amp; BAN <span class="sp-name-highlight">ĐIỀU HÀNH</span></h2>
+        <p class="speaker-sub">Đội ngũ chuyên gia và lãnh đạo cấp cao trực tiếp đồng hành, định hướng chiến lược và hỗ trợ bạn xây dựng dòng thu nhập bền vững trong kỷ nguyên AI &amp; Web3.</p>
       </div>
 
+      <!-- Speaker 1: Võ Quốc Trí -->
       <div class="speaker-card">
         <div class="sp-img-frame">
           <img src="images/vo_quoc_tri.jpg" alt="Chuyên gia Võ Quốc Trí - Giám Đốc Phát Triển Thị Trường Astronixa Việt Nam" width="800" height="800" loading="lazy">
@@ -1960,6 +1964,49 @@
               <span>Hotline 0931332671</span>
             </a>
           </div>
+        </div>
+      </div>
+
+      <!-- Speaker 2: Sơn Nguyễn -->
+      <div class="speaker-card">
+        <div class="sp-img-frame">
+          <img src="images/son_nguyen.png" alt="Diễn giả Sơn Nguyễn - Co-Founder &amp; Giám Đốc Vận Hành Astronixa Châu Á Thái Bình Dương" width="800" height="1200" loading="lazy" style="object-position: center 12%;">
+        </div>
+
+        <div class="sp-details">
+          <div class="sp-name-row">
+            <h3 class="sp-main-name">Sơn Nguyễn</h3>
+            <svg class="sp-verified" viewBox="0 0 24 24" title="Verified Expert">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+          </div>
+
+          <div class="sp-role-tag">
+            CO-FOUNDER &amp; GIÁM ĐỐC VẬN HÀNH ASTRONIXA CHÂU Á THÁI BÌNH DƯƠNG · CHỦ TỊCH WOUGROUP
+          </div>
+
+          <p class="sp-bio">
+            Doanh nhân &amp; chuyên gia đầu tư tài chính với hơn 10 năm kinh nghiệm trong ngành ngân hàng, ngoại hối và tài sản số — nhà kiến tạo mô hình kinh doanh và mạng lưới phát triển quy mô hàng chục ngàn thành viên.
+          </p>
+
+          <ul class="sp-bullets">
+            <li><span class="sp-bullet-icon">✦</span><span><b>Chủ tịch Công Ty Wougroup</b> — Nhà sáng lập sàn TMĐT và cty công nghệ, Fintech.</span></li>
+            <li><span class="sp-bullet-icon">✦</span><span><b>TGĐ 2 công ty BĐS và 6 sàn giao dịch</b> với quy mô hơn 600 nhân viên.</span></li>
+            <li><span class="sp-bullet-icon">✦</span><span><b>Xây dựng hệ thống bán hàng</b> trong và ngoài nước hơn 30 ngàn người.</span></li>
+            <li><span class="sp-bullet-icon">✦</span><span><b>Kinh nghiệm 10 năm</b> trong ngành tài chính ngân hàng, ngoại hối, Crypto.</span></li>
+            <li><span class="sp-bullet-icon">✦</span><span><b>Thành viên Top 100 đầu tiên</b> của Liên minh tài sản số tại Việt Nam sau nghị định số 05 ngày 9/9/2025.</span></li>
+            <li><span class="sp-bullet-icon">✦</span><span><b>Co-Founder &amp; Giám Đốc Vận Hành</b> Astronixa Châu Á Thái Bình Dương.</span></li>
+          </ul>
+
+          <a class="sp-btn-phone" href="tel:0931332671">
+            <svg style="width:16px;height:16px;fill:currentColor" viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.44-5.15-3.75-6.59-6.59l1.97-1.57c.28-.27.36-.67.25-1.02A11.36 11.36 0 019 4.31c0-.55-.45-1-1-1H4.5c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-.99-1z"/></svg>
+            Hotline Ban tổ chức: 0931 332 671
+          </a>
+
+          <a class="sp-btn-cta" href="#dang-ky">
+            <svg style="width:18px;height:18px;fill:currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            Liên hệ đồng hành cùng Diễn Giả Sơn Nguyễn
+          </a>
         </div>
       </div>
     </div>
