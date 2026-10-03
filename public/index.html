@@ -705,39 +705,103 @@
     .map-btn.ghost:hover { background: rgba(124, 58, 237, .08); }
 
     /* Key Topics / Pillars */
-    .pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-    .pillar { padding: 26px 28px; position: relative; overflow: hidden; }
+    .pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .pillar { padding: 28px 30px; position: relative; overflow: hidden; display: flex; flex-direction: column; }
     .pillar::after {
       content: "";
       position: absolute;
-      top: 0; right: 0; width: 80px; height: 80px;
-      background: radial-gradient(circle at top right, rgba(124, 58, 237, .15), transparent 70%);
+      top: 0; right: 0; width: 100px; height: 100px;
+      background: radial-gradient(circle at top right, rgba(124, 58, 237, .18), transparent 70%);
+      pointer-events: none;
     }
     .pillar .lbl {
       font-family: "Be Vietnam Pro", sans-serif;
       font-weight: 800;
-      font-size: 12px;
-      letter-spacing: .16em;
+      font-size: 12.5px;
+      letter-spacing: .12em;
       text-transform: uppercase;
       color: var(--gold-2);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
     }
-    .pillar h3 { font-weight: 800; font-size: 21px; margin: 6px 0 14px; color: var(--amber); }
-    .pillar ul { list-style: none; display: grid; gap: 8px; }
-    .pillar li {
-      font-size: 15px;
-      line-height: 1.45;
-      padding-left: 20px;
+    .pillar h3 { font-weight: 800; font-size: 20.5px; margin: 4px 0 14px; color: var(--amber); line-height: 1.35; }
+    .pillar p {
+      font-size: 14.5px;
+      line-height: 1.58;
+      color: var(--w80);
+      margin-bottom: 12px;
+    }
+    .pillar .callout-q {
+      font-weight: 700;
+      color: var(--amber-2);
+      background: rgba(124, 58, 237, .07);
+      padding: 10px 14px;
+      border-left: 3px solid var(--amber-2);
+      border-radius: 0 8px 8px 0;
+      margin: 8px 0 14px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .pillar ol.pillar-numbered {
+      list-style: none;
+      counter-reset: p-counter;
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .pillar ol.pillar-numbered li {
+      font-size: 14.5px;
+      line-height: 1.48;
+      padding-left: 30px;
+      position: relative;
+      color: var(--w80);
+      counter-increment: p-counter;
+    }
+    .pillar ol.pillar-numbered li::before {
+      content: counter(p-counter);
+      position: absolute;
+      left: 0;
+      top: 1px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--amber-2), var(--amber));
+      color: #ffffff;
+      font-family: "Be Vietnam Pro", sans-serif;
+      font-weight: 800;
+      font-size: 11px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 2px 6px rgba(124, 58, 237, .25);
+    }
+    .pillar ul.pillar-bullets {
+      list-style: none;
+      display: grid;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .pillar ul.pillar-bullets li {
+      font-size: 14.5px;
+      line-height: 1.52;
+      padding-left: 22px;
       position: relative;
       color: var(--w80);
     }
-    .pillar li::before {
+    .pillar ul.pillar-bullets li::before {
       content: "";
       position: absolute;
       left: 0; top: .55em;
-      width: 6px; height: 6px;
+      width: 7px; height: 7px;
       border-radius: 2px;
       background: var(--amber-2);
       transform: rotate(45deg);
+    }
+    .pillar ul.pillar-bullets li b {
+      color: var(--amber);
+      font-family: "Be Vietnam Pro", sans-serif;
+      font-weight: 700;
     }
 
     /* Agenda / Timeline */
@@ -1634,24 +1698,49 @@
     <div class="sec" id="noi-dung">
       <div class="sec-head"><span class="sec-no">01</span><h2 class="sec-title">Nội dung trọng tâm</h2></div>
       <div class="pillars">
+        
+        <!-- Pillar 1: Buổi Sáng Business Meeting Astronixa -->
         <div class="pillar glass">
-          <div class="lbl">Chủ đề 1</div>
-          <h3>Chiến lược &amp; Ứng dụng AI Đột phá</h3>
-          <ul>
-            <li>Toàn cảnh xu hướng AI toàn cầu và bước chuyển dịch 2026 – 2030</li>
-            <li>Ứng dụng AI tự động hóa quy trình, tinh gọn bộ máy &amp; bứt phá doanh số</li>
-            <li>Thực hành trực tiếp với Bộ Tool AI &amp; Hệ thống Skill thông minh</li>
+          <div class="lbl">
+            <svg style="width:14px;height:14px;stroke:var(--gold-2);fill:none;stroke-width:2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            Buổi Sáng Business Meeting Astronixa
+          </div>
+          <h3>“Tiên phong Hôm Nay - Dẫn Đầu Ngày Mai”</h3>
+          <p>Trong kỷ nguyên số, chúng ta không chỉ dùng mạng xã hội, mua sắm online, game, ví hay các nền tảng công nghệ khác mỗi ngày. Câu hỏi lớn hơn là:</p>
+          <div class="callout-q">Làm thế nào để biến thời gian, mối quan hệ và cộng đồng của mình thành tài sản, dòng tiền và cơ hội phát triển dài hạn?</div>
+          <p><strong>Astronixa Company</strong> trân trọng mời Anh/Chị tham dự chương trình offline thân mật dành cho khách mời chọn lọc, nhằm giới thiệu hệ sinh thái <strong>Astronixa – OHANA-C</strong> và cơ hội trở thành đối tác trong giai đoạn bùng nổ thị trường.</p>
+          <ol class="pillar-numbered">
+            <li><strong>Hiểu tổng quan</strong> về hệ sinh thái Super App Ohana.</li>
+            <li><strong>Nắm rõ quyền lợi</strong> khi trở thành đối tác sớm tiến đến con đường thịnh vượng.</li>
+            <li><strong>Được hướng dẫn</strong> cách bắt đầu từ nhỏ, trải nghiệm trước, phát triển tự động hóa hoàn toàn bằng AI.</li>
+            <li><strong>Kết nối trực tiếp</strong> với đội ngũ đồng hành và cộng đồng OHANA.</li>
+            <li><strong>Nhận tài liệu, kịch bản, lộ trình hỗ trợ</strong> để triển khai nếu phù hợp.</li>
+          </ol>
+        </div>
+
+        <!-- Pillar 2: Cafe Workshop AI -->
+        <div class="pillar glass">
+          <div class="lbl">
+            <svg style="width:14px;height:14px;stroke:var(--gold-2);fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>
+            Cafe Workshop AI
+          </div>
+          <h3>“Thực Hành AI Ứng Dụng Thực Chiến Cho Công Việc”</h3>
+          <ul class="pillar-bullets">
+            <li>
+              <b>Làm chủ công nghệ thực tế:</b> Trực tiếp vận hành AI Agent thế hệ mới để tự động hóa trọn gói các quy trình phức tạp, thay vì chỉ biết đặt câu hỏi trò chuyện thông thường.
+            </li>
+            <li>
+              <b>Cầm tay chỉ việc 1-1:</b> Được đội ngũ chuyên gia hướng dẫn sát sao trên chính thiết bị của bạn, cam kết ra kết quả thực tế ngay tại chỗ.
+            </li>
+            <li>
+              <b>X20 hiệu suất vận hành:</b> Tiếp thu tư duy tối ưu quy trình độc quyền, giải phóng đến 80% thời gian thủ công để tập trung vào chiến lược cốt lõi.
+            </li>
+            <li>
+              <b>Mở rộng mạng lưới chất lượng:</b> Gặp gỡ, kết nối và sẻ chia kinh nghiệm cùng cộng đồng những nhà quản lý, nhân sự và người tiên phong công nghệ.
+            </li>
           </ul>
         </div>
-        <div class="pillar glass">
-          <div class="lbl">Chủ đề 2</div>
-          <h3>Cơ hội Cổ đông Doanh nghiệp Công nghệ Mỹ</h3>
-          <ul>
-            <li>Tổng quan tập đoàn công nghệ, hệ sinh thái sản phẩm và tiềm năng thị trường</li>
-            <li>Lộ trình IPO, định hướng phát triển &amp; chính sách quyền lợi cổ đông đặc quyền</li>
-            <li>Đối thoại trực tiếp, bảo mật thông tin cùng Ban điều hành &amp; Diễn giả</li>
-          </ul>
-        </div>
+
       </div>
     </div>
 
