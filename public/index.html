@@ -1432,6 +1432,168 @@
     .hl-txt small { font-family: "Be Vietnam Pro", sans-serif; font-weight: 700; font-size: 12.5px; color: var(--w80); letter-spacing: 0; }
     .hotline svg { width: 18px; height: 18px; stroke: var(--amber); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
+    /* Banking & VietQR Transfer Box */
+    .bank-box {
+      margin-top: 24px;
+      padding: 22px 24px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(245, 158, 11, 0.08));
+      border: 1.5px solid rgba(124, 58, 237, 0.25);
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.06);
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    .bank-qr-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+    }
+    .bank-qr-frame {
+      width: 160px;
+      height: 160px;
+      border-radius: 14px;
+      background: #ffffff;
+      padding: 8px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.25s ease;
+    }
+    .bank-qr-frame:hover {
+      transform: scale(1.03);
+    }
+    .bank-qr-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      border-radius: 8px;
+    }
+    .bank-qr-hint {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--amber);
+      letter-spacing: 0.02em;
+    }
+    .bank-details {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .bank-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      align-self: flex-start;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, rgba(124, 58, 237, 0.15), rgba(245, 158, 11, 0.15));
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      font-family: "Be Vietnam Pro", sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 2px;
+    }
+    .bank-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .bank-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--w80);
+      line-height: 1.4;
+    }
+    .bank-row .b-lbl {
+      min-width: 115px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--w60);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .bank-row .b-val {
+      color: #1e293b;
+      font-size: 14.5px;
+    }
+    .bank-row.highlight {
+      background: rgba(245, 158, 11, 0.12);
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px dashed rgba(245, 158, 11, 0.6);
+    }
+    .bank-row.highlight .b-lbl {
+      color: var(--amber);
+      font-weight: 800;
+    }
+    .bank-row.highlight .stk {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .bank-row.highlight .stk code {
+      font-family: "Be Vietnam Pro", monospace;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: #b45309;
+      background: #fff;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .btn-copy-stk {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--amber-2);
+      background: var(--amber-2);
+      color: #fff;
+      font-family: "Be Vietnam Pro", sans-serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-copy-stk:hover {
+      background: var(--amber);
+      transform: translateY(-1px);
+    }
+    .bank-row .name b {
+      color: var(--amber);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .bank-row .memo b {
+      color: #1e293b;
+      font-family: monospace;
+      font-size: 13.5px;
+      background: rgba(124, 58, 237, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .bank-note {
+      font-size: 12.5px;
+      color: var(--w60);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
     .note { margin-top: 28px; font-size: 12.5px; line-height: 1.5; color: var(--w60); }
     .foot {
       display: flex;
@@ -1537,6 +1699,12 @@
       .submit-row { flex-direction: column; align-items: stretch; }
       .btn { width: 100%; }
       .hotline { margin-left: 0; padding-left: 0; border-left: none; border-top: 1px solid var(--line); padding-top: 16px; justify-content: center; }
+      .bank-box { grid-template-columns: 1fr; text-align: center; justify-items: center; gap: 18px; padding: 18px 14px; }
+      .bank-details { width: 100%; text-align: left; }
+      .bank-badge { align-self: center; }
+      .bank-row { flex-direction: column; align-items: flex-start; gap: 2px; }
+      .bank-row .b-lbl { min-width: unset; }
+      .bank-row.highlight .stk { flex-wrap: wrap; }
       .admin-fab span { display: none; }
       .admin-fab { padding: 0; width: 44px; justify-content: center; left: 14px; bottom: 14px; }
       .scroll-top { right: 14px; bottom: 14px; }
@@ -2186,6 +2354,50 @@
               </span>
             </a>
           </div>
+
+          <!-- Banking & VietQR Payment Box -->
+          <div class="bank-box" id="thong-tin-chuyen-khoan">
+            <div class="bank-qr-wrap">
+              <div class="bank-qr-frame">
+                <img src="images/vietinbank-qr.png" alt="Mã QR Chuyển Khoản VietinBank - VO QUOC TRI" width="300" height="300" loading="lazy">
+              </div>
+              <span class="bank-qr-hint">📱 Quét QR chuyển khoản 24/7</span>
+            </div>
+            <div class="bank-details">
+              <div class="bank-badge">💳 THÔNG TIN CHUYỂN KHOẢN THANH TOÁN VÉ</div>
+              <div class="bank-grid">
+                <div class="bank-row">
+                  <span class="b-lbl">Ngân hàng:</span>
+                  <span class="b-val"><b>VietinBank</b> (Ngân hàng TMCP Công Thương Việt Nam)</span>
+                </div>
+                <div class="bank-row">
+                  <span class="b-lbl">Chi nhánh:</span>
+                  <span class="b-val">CN 7 - TP HCM - PGD LƯƠNG ĐỊNH CỦA</span>
+                </div>
+                <div class="bank-row highlight">
+                  <span class="b-lbl">Số tài khoản:</span>
+                  <span class="b-val stk">
+                    <code>102884237305</code>
+                    <button type="button" class="btn-copy-stk" onclick="copySTK('102884237305')" title="Sao chép số tài khoản">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                      <span id="copySTKText">Sao chép STK</span>
+                    </button>
+                  </span>
+                </div>
+                <div class="bank-row">
+                  <span class="b-lbl">Chủ tài khoản:</span>
+                  <span class="b-val name"><b>VÕ QUỐC TRÍ</b></span>
+                </div>
+                <div class="bank-row">
+                  <span class="b-lbl">Nội dung CK:</span>
+                  <span class="b-val memo"><b>[Họ tên] [Số điện thoại] VE BM2026</b></span>
+                </div>
+              </div>
+              <p class="bank-note">
+                <i>(Quý khách có thể quét mã QR chuyển khoản trước hoặc điền form để Ban tổ chức liên hệ hỗ trợ xác nhận vị trí ghế ngồi &amp; gửi vé mời điện tử)</i>
+              </p>
+            </div>
+          </div>
         </form>
       </div>
     </div>
@@ -2564,6 +2776,19 @@
           }
         });
       }
+      // Copy Account Number Helper
+      window.copySTK = function(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function() {
+            const el = document.getElementById('copySTKText');
+            if (el) {
+              const old = el.textContent;
+              el.textContent = '✓ Đã sao chép';
+              setTimeout(function() { el.textContent = old; }, 2500);
+            }
+          });
+        }
+      };
     })();
   </script>
 </body>
