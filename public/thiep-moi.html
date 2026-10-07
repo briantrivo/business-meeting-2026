@@ -967,34 +967,34 @@
 
     /* Event Logistics & QR Details */
     .p-logistics-box {
-      padding: 22px 28px;
+      padding: 20px 24px;
       border-radius: 16px;
       background: linear-gradient(135deg, rgba(20, 10, 42, 0.85), rgba(12, 6, 28, 0.95));
       border: 1.5px solid rgba(0, 240, 255, 0.35);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(160, 32, 240, 0.15);
       display: grid;
-      grid-template-columns: 1fr 180px;
-      gap: 24px;
+      grid-template-columns: 1fr 142px 142px;
+      gap: 16px;
       align-items: center;
     }
 
     .p-log-details {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
 
     .p-log-row {
       display: flex;
       align-items: center;
-      gap: 14px;
-      font-size: 19px;
+      gap: 12px;
+      font-size: 18px;
       color: #ede3ff;
     }
 
     .p-log-row svg {
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       stroke: #00f0ff;
       flex: none;
     }
@@ -1006,52 +1006,78 @@
 
     .p-log-row span.sub {
       color: #b7add1;
-      font-size: 16px;
+      font-size: 15px;
       margin-left: 6px;
     }
 
-    /* QR Code Check-in Box */
+    /* QR Code Wrappers */
     .p-qr-wrap {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
       gap: 6px;
-      padding-left: 20px;
+      padding-left: 16px;
+      border-left: 1px solid rgba(0, 240, 255, 0.25);
+    }
+
+    .p-qr-wrap.zalo-wrap {
       border-left: 1px solid rgba(0, 240, 255, 0.25);
     }
 
     .p-qr-code {
-      width: 110px;
-      height: 110px;
+      width: 104px;
+      height: 104px;
       background: #ffffff;
       border-radius: 10px;
-      padding: 6px;
+      padding: 5px;
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
     }
 
     .p-qr-code img, .p-qr-code canvas {
       width: 100% !important;
       height: 100% !important;
+      display: block;
+      object-fit: contain;
     }
 
     .p-qr-lbl {
       font-size: 11px;
       font-weight: 800;
       color: #00f0ff;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .p-qr-id {
       font-family: monospace;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
       color: #fef08a;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .p-qr-lbl-zalo {
+      font-size: 11px;
+      font-weight: 800;
+      color: #38bdf8;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .p-qr-sub-zalo {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #a5f3fc;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
     }
 
     /* Poster Bottom Closing */
@@ -1156,6 +1182,8 @@
     }
     #poster.theme-gold .p-log-row svg { stroke: #fbbf24; }
     #poster.theme-gold .p-qr-lbl { color: #fbbf24; }
+    #poster.theme-gold .p-qr-lbl-zalo { color: #fbbf24; }
+    #poster.theme-gold .p-qr-sub-zalo { color: #fef08a; }
 
     /* Cyber Emerald Theme */
     #poster.theme-emerald {
@@ -1174,7 +1202,7 @@
     #poster.theme-emerald .p-kicker-line.r { background: linear-gradient(90deg, #34d399, transparent); }
     #poster.theme-emerald .p-avatar-aura {
       background: linear-gradient(135deg, #059669 0%, #10b981 50%, #6ee7b7 100%);
-      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 40px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 40px rgba(160, 185, 129, 0.4);
     }
     #poster.theme-emerald .p-guest-name {
       background: linear-gradient(135deg, #ffffff 10%, #a7f3d0 50%, #10b981 100%);
@@ -1191,6 +1219,8 @@
     #poster.theme-emerald .p-logistics-box { border-color: rgba(16, 185, 129, 0.4); }
     #poster.theme-emerald .p-log-row svg { stroke: #34d399; }
     #poster.theme-emerald .p-qr-lbl { color: #34d399; }
+    #poster.theme-emerald .p-qr-lbl-zalo { color: #34d399; }
+    #poster.theme-emerald .p-qr-sub-zalo { color: #a7f3d0; }
 
     /* Responsive Queries */
     @media (max-width: 1080px) {
@@ -1532,6 +1562,15 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
                   <div>Hotline Ban tổ chức: <b>0931 332 671</b></div>
                 </div>
+              </div>
+
+              <!-- QR Code 1: Nhóm Zalo Sự Kiện (Ô đỏ) -->
+              <div class="p-qr-wrap zalo-wrap">
+                <div class="p-qr-code">
+                  <img src="images/zalo-group-qr.png" alt="Mã QR Nhóm Zalo Khách Mời">
+                </div>
+                <div class="p-qr-lbl-zalo">NHÓM ZALO VIP</div>
+                <div class="p-qr-sub-zalo">Quét Tham Gia</div>
               </div>
 
               <!-- Dynamic QR Code -->
