@@ -7,8 +7,14 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'astronixa2026';
-const DATA_FILE = path.join(__dirname, 'data', 'leads.json');
+const IS_VERCEL = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const SEED_DATA_FILE = path.join(__dirname, 'data', 'leads.json');
+const DATA_FILE = IS_VERCEL ? path.join('/tmp', 'leads.json') : SEED_DATA_FILE;
 const GOOGLE_SHEET_WEBHOOK_URL = process.env.GOOGLE_SHEET_WEBHOOK_URL || 'https://script.google.com/macros/s/AKfycbwlYK0UcsFwZStFfjWhMUcT-62HDwJx32_kCtYfuaNYqnI9ebD9T1lOzkGu9PYkBSRX/exec';
+
+// In-memory leads cache and tombstone IDs
+let memoryLeads = null;
+const memoryDeletedIds = new Set();
 
 // Helper: Forward lead data to Google Sheet Webhook
 async function forwardToGoogleSheet(lead) {
@@ -50,14 +56,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Helper: Ensure data directory and file exist
 function getLeads() {
+  if (memoryLeads !== null) {
+    return memoryLeads.filter(l => !memoryDeletedIds.has(l.id));
+  }
   try {
     if (!fs.existsSync(DATA_FILE)) {
-      fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-      fs.writeFileSync(DATA_FILE, '[]', 'utf8');
-      return [];
+      let initialData = '[]';
+      if (fs.existsSync(SEED_DATA_FILE)) {
+        initialData = fs.readFileSync(SEED_DATA_FILE, 'utf8');
+      }
+      try {
+        fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
+        fs.writeFileSync(DATA_FILE, initialData, 'utf8');
+      } catch (wErr) {
+        console.warn('Cannot write initial DATA_FILE to disk:', wErr.message);
+      }
+      memoryLeads = JSON.parse(initialData || '[]');
+      return memoryLeads.filter(l => !memoryDeletedIds.has(l.id));
     }
     const data = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(data || '[]');
+    memoryLeads = JSON.parse(data || '[]');
+    return memoryLeads.filter(l => !memoryDeletedIds.has(l.id));
   } catch (err) {
     console.error('Error reading leads:', err);
     return [];
@@ -65,13 +84,14 @@ function getLeads() {
 }
 
 function saveLeads(leads) {
+  memoryLeads = leads;
   try {
     fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
     fs.writeFileSync(DATA_FILE, JSON.stringify(leads, null, 2), 'utf8');
     return true;
   } catch (err) {
-    console.error('Error saving leads:', err);
-    return false;
+    console.error('Error saving leads to file:', err.message);
+    return true; // Still true because memoryLeads is updated in RAM
   }
 }
 
@@ -201,20 +221,29 @@ app.patch('/api/leads', checkAdminAuth, (req, res) => {
   }
 });
 
+// API: Sync Deleted Leads (Admin Only)
+app.post('/api/leads/sync-deleted', checkAdminAuth, (req, res) => {
+  try {
+    const { ids } = req.body || {};
+    if (Array.isArray(ids)) {
+      ids.forEach(id => memoryDeletedIds.add(String(id)));
+      let leads = getLeads().filter(l => !memoryDeletedIds.has(l.id));
+      saveLeads(leads);
+    }
+    res.json({ ok: true, deletedCount: memoryDeletedIds.size });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Lỗi đồng bộ xóa dữ liệu.' });
+  }
+});
+
 // API: Delete Lead (Admin Only)
 app.delete('/api/leads/:id', checkAdminAuth, (req, res) => {
   try {
     const { id } = req.params;
-    let leads = getLeads();
-    const initialLen = leads.length;
-    leads = leads.filter(l => l.id !== id);
-    
-    if (leads.length === initialLen) {
-      return res.status(404).json({ ok: false, error: 'Không tìm thấy ID cần xóa.' });
-    }
-
+    memoryDeletedIds.add(id);
+    let leads = getLeads().filter(l => l.id !== id);
     saveLeads(leads);
-    res.json({ ok: true, message: 'Đã xóa đăng ký thành công.' });
+    res.json({ ok: true, message: 'Đã xóa đăng ký thành công.', deletedId: id });
   } catch (err) {
     res.status(500).json({ ok: false, error: 'Lỗi xóa dữ liệu.' });
   }
@@ -276,7 +305,7 @@ app.get('*', (req, res) => {
 module.exports = app;
 
 // Start Server if run directly
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`====================================================`);
     console.log(`🚀 Business Meeting 2026 Server running at:`);

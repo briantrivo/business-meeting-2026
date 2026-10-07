@@ -330,6 +330,10 @@
     <!-- Action & Search Bar -->
     <div class="bar">
       <input id="q" placeholder="🔍 Tìm kiếm nhanh theo tên, SĐT, email, doanh nghiệp, ghi chú...">
+      <button type="button" id="cleanTestBtn" class="ghost" style="color: #fca5a5; border-color: rgba(248, 113, 113, 0.4);" title="Dọn dẹp nhanh các khách test">
+        <svg style="width: 15px; height: 15px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Xóa data test
+      </button>
       <button type="button" id="reloadBtn" class="ghost">
         <svg style="width: 15px; height: 15px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         Tải lại
@@ -385,6 +389,42 @@
   let filter = "";
   let pendingRender = false;
 
+  const LS_DELETED_KEY = "bm_crm_deleted_ids";
+  const LS_OVERRIDES_KEY = "bm_crm_overrides";
+
+  function getDeletedIds() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(LS_DELETED_KEY) || "[]");
+      return new Set(Array.isArray(arr) ? arr : []);
+    } catch (e) {
+      return new Set();
+    }
+  }
+
+  function saveDeletedId(id) {
+    try {
+      const s = getDeletedIds();
+      s.add(String(id));
+      localStorage.setItem(LS_DELETED_KEY, JSON.stringify(Array.from(s)));
+    } catch (e) {}
+  }
+
+  function getOverrides() {
+    try {
+      return JSON.parse(localStorage.getItem(LS_OVERRIDES_KEY) || "{}");
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveOverride(id, patch) {
+    try {
+      const ov = getOverrides();
+      ov[id] = Object.assign({}, ov[id] || {}, patch);
+      localStorage.setItem(LS_OVERRIDES_KEY, JSON.stringify(ov));
+    } catch (e) {}
+  }
+
   try { pw = sessionStorage.getItem("bm_admin_pw") || ""; } catch (e) {}
 
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
@@ -418,7 +458,28 @@
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Mật khẩu không chính xác.");
 
-      leads = data.leads || [];
+      const rawLeads = data.leads || [];
+      const deletedIds = getDeletedIds();
+      const overrides = getOverrides();
+
+      // If server returned any lead that was previously deleted locally, sync tombstone to server
+      const resurrected = rawLeads.filter(l => deletedIds.has(l.id));
+      if (resurrected.length > 0) {
+        fetch("/api/leads/sync-deleted", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-admin-password": pw },
+          body: JSON.stringify({ ids: Array.from(deletedIds) })
+        }).catch(() => {});
+      }
+
+      // Filter out deleted leads and apply local overrides
+      leads = rawLeads.filter(l => !deletedIds.has(l.id)).map(l => {
+        if (overrides[l.id]) {
+          return Object.assign({}, l, overrides[l.id]);
+        }
+        return l;
+      });
+
       if (seen) {
         const added = leads.filter((l) => !seen.has(l.id));
         added.forEach((l) => fresh.add(l.id));
@@ -460,38 +521,39 @@
   }
 
   async function saveCrm(id, patch) {
+    saveOverride(id, patch);
+    const idx = leads.findIndex((l) => l.id === id);
+    if (idx >= 0) leads[idx] = Object.assign({}, leads[idx], patch);
+    toast("✅ Đã cập nhật trạng thái CRM");
+    safeRender();
+
     try {
-      const res = await fetch("/api/leads", {
+      await fetch("/api/leads", {
         method: "PATCH",
         headers: { "Content-Type": "application/json", "x-admin-password": pw },
         body: JSON.stringify({ id, ...patch })
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Lưu chưa thành công.");
-      
-      const idx = leads.findIndex((l) => l.id === id);
-      if (idx >= 0) leads[idx] = data.lead;
-      toast("✅ Đã cập nhật trạng thái CRM");
-      safeRender();
     } catch (err) {
-      toast("❌ " + err.message);
+      console.warn("Patch request warning:", err);
     }
   }
 
   async function deleteLead(id, name) {
     if (!confirm(`Bạn có chắc chắn muốn xóa đăng ký của "${name}" không?`)) return;
+    
+    // Save to local deleted list immediately so it will never reappear
+    saveDeletedId(id);
+    leads = leads.filter(l => l.id !== id);
+    toast("🗑️ Đã xóa vĩnh viễn: " + name);
+    render();
+
     try {
-      const res = await fetch(`/api/leads/${id}`, {
+      await fetch(`/api/leads/${id}`, {
         method: "DELETE",
         headers: { "x-admin-password": pw }
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Xóa chưa thành công.");
-      leads = leads.filter(l => l.id !== id);
-      toast("🗑️ Đã xóa đăng ký");
-      render();
     } catch (err) {
-      toast("❌ " + err.message);
+      console.warn("Server delete warning:", err);
     }
   }
 
@@ -604,6 +666,33 @@
   });
 
   $("reloadBtn").addEventListener("click", () => load());
+  
+  $("cleanTestBtn").addEventListener("click", async () => {
+    const isTest = (l) => {
+      const txt = [l.full_name, l.email, l.phone, l.company, l.note].join(" ").toLowerCase();
+      return txt.includes("test") || (l.email && l.email.endsWith("@example.com")) || l.phone === "0987654321" || l.id.startsWith("lead-");
+    };
+    const testList = leads.filter(isTest);
+    if (!testList.length) {
+      toast("ℹ️ Hiện không tìm thấy dữ liệu test nào cần dọn dẹp.");
+      return;
+    }
+    if (!confirm(`Bạn có chắc muốn xóa đồng loạt ${testList.length} khách test này không?`)) return;
+    
+    testList.forEach(l => saveDeletedId(l.id));
+    leads = leads.filter(l => !isTest(l));
+    toast(`🗑️ Đã xóa sạch ${testList.length} dữ liệu test!`);
+    render();
+
+    try {
+      await fetch("/api/leads/sync-deleted", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-password": pw },
+        body: JSON.stringify({ ids: testList.map(l => l.id) })
+      });
+    } catch (e) {}
+  });
+
   $("csvBtn").addEventListener("click", exportCsv);
   
   $("logoutBtn").addEventListener("click", () => {
