@@ -2,6 +2,9 @@
   "version": 2,
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/thiep-moi", "destination": "/thiep-moi.html" },
+    { "source": "/thiepmoi", "destination": "/thiep-moi.html" },
+    { "source": "/invitation", "destination": "/thiep-moi.html" },
     { "source": "/api/(.*)", "destination": "/api/index.js" },
     { "source": "/(.*)", "destination": "/$1" }
   ]

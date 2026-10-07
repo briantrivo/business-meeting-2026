@@ -262,6 +262,11 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+// Invitation Card Routes
+app.get(['/thiep-moi', '/thiepmoi', '/invitation'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'thiep-moi.html'));
+});
+
 // Root Route
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

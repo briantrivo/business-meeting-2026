@@ -25,7 +25,22 @@ Website sự kiện chuyên nghiệp dành cho **Business Meeting 2026** (ASTRON
 
 ---
 
-### B. Hệ Thống Quản Trị CRM (`http://localhost:3000/admin`)
+### B. Bộ Tạo Thiệp Mời VIP Cá Nhân Hóa (`http://localhost:3000/thiep-moi`)
+1. **Cá nhân hóa theo tên & chức danh:** Tự động điều chỉnh kích cỡ font chữ khi người dùng nhập tên và vai trò để luôn cân đối, thẩm mỹ.
+2. **Tải & căn chỉnh ảnh chân dung:** Hỗ trợ kéo thả/tải ảnh, thanh trượt phóng to/thu nhỏ (Zoom 80% - 280%), căn chỉnh vị trí dọc (Y) và ngang (X), kèm sẵn 4 ảnh đại diện mẫu của dàn Diễn giả.
+3. **3 Phong cách màu sắc đẳng cấp (Theme Switcher):**
+   - 🌌 **Cosmic Neon:** Tím vũ trụ & Xanh điện quang (phong cách công nghệ AI Astronixa).
+   - 👑 **Royal Gold:** Đen huyền bí & Vàng kim hoàng gia sang trọng.
+   - 💎 **Cyber Emerald:** Xanh ngọc lục bảo & Hologram tương lai.
+4. **Mã vé VIP & Mã QR Check-in động:** Tự động sinh mã định danh duy nhất (`BM26-VIP-XXXX`) cùng mã QR dẫn trực tiếp về website sự kiện.
+5. **Xuất ảnh đa định dạng siêu nét:**
+   - 📥 **Tải thiệp PNG:** Độ phân giải cao Ultra-HD (2160px width, tỉ lệ 2x) chuẩn in ấn & đăng mạng xã hội.
+   - 📥 **Tải thiệp JPG:** Tối ưu dung lượng nhẹ để đăng Story, Zalo, Facebook.
+   - 📋 **Sao chép ảnh vào Clipboard (1-Click):** Dán trực tiếp ngay vào Zalo, Messenger, Canva hoặc Photoshop.
+
+---
+
+### C. Hệ Thống Quản Trị CRM (`http://localhost:3000/admin`)
 1. **Bảo mật bằng mật khẩu:** Mặc định `astronixa2026` (lưu phiên làm việc an toàn).
 2. **Thống kê KPI Realtime:**
    - Tổng số lượt đăng ký.
@@ -64,6 +79,7 @@ npm run dev
 
 ### Bước 4: Mở trình duyệt
 - **Trang chủ Landing Page:** [http://localhost:3000](http://localhost:3000)
+- **Trang Tạo Thiệp Mời VIP:** [http://localhost:3000/thiep-moi](http://localhost:3000/thiep-moi)
 - **Trang Quản trị CRM:** [http://localhost:3000/admin](http://localhost:3000/admin)
 - **Mật khẩu Quản trị mặc định:** `astronixa2026`
 
