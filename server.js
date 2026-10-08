@@ -16,7 +16,32 @@ const GOOGLE_SHEET_WEBHOOK_URL = process.env.GOOGLE_SHEET_WEBHOOK_URL || 'https:
 let memoryLeads = null;
 const memoryDeletedIds = new Set();
 
-// Helper: Forward lead data to Google Sheet Webhook
+// Helper: Fetch Leads from Google Sheet Webhook (doGet)
+async function fetchGoogleSheetLeads() {
+  if (!GOOGLE_SHEET_WEBHOOK_URL) return [];
+  try {
+    if (typeof fetch === 'function') {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const resp = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+        method: 'GET',
+        redirect: 'follow',
+        headers: { 'Accept': 'application/json' },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      const data = await resp.json().catch(() => null);
+      if (data && data.ok && Array.isArray(data.leads)) {
+        return data.leads;
+      }
+    }
+  } catch (err) {
+    // Non-blocking Google Sheet fetch failure
+  }
+  return [];
+}
+
+// Helper: Forward lead data to Google Sheet Webhook (doPost)
 async function forwardToGoogleSheet(lead) {
   if (!GOOGLE_SHEET_WEBHOOK_URL) return;
   try {
@@ -30,7 +55,8 @@ async function forwardToGoogleSheet(lead) {
       attendees: lead.attendees,
       event: lead.event,
       source: [lead.utm_source, lead.utm_medium, lead.utm_campaign].filter(Boolean).join(' / ') || lead.source,
-      note: lead.note || 'Mới đăng ký'
+      note: lead.note || 'Mới đăng ký',
+      status: lead.status || 'moi'
     };
 
     if (typeof fetch === 'function') {
@@ -152,7 +178,7 @@ app.post('/api/register', async (req, res) => {
 
     const leads = getLeads();
     const newLead = {
-      id: 'lead-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+      id: 'reg-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
       received_at: new Date().toISOString(),
       full_name: fullName,
       phone: phone,
@@ -172,8 +198,8 @@ app.post('/api/register', async (req, res) => {
     leads.unshift(newLead);
     saveLeads(leads);
 
-    // Forward to Google Sheet Webhook
-    await forwardToGoogleSheet(newLead);
+    // Forward to Google Sheet Webhook in background
+    forwardToGoogleSheet(newLead).catch(() => {});
 
     res.json({
       ok: true,
@@ -186,13 +212,52 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// API: Get Leads (Admin Only)
-app.get('/api/leads', checkAdminAuth, (req, res) => {
+// API: Get Leads (Admin Only) with Google Sheets & Local Hybrid Persistence
+app.get('/api/leads', checkAdminAuth, async (req, res) => {
   try {
-    const leads = getLeads();
-    res.json({ ok: true, leads });
+    let localLeads = getLeads();
+
+    // Hybrid Sync: Fetch from Google Sheet if possible
+    try {
+      const sheetLeads = await fetchGoogleSheetLeads();
+      if (Array.isArray(sheetLeads) && sheetLeads.length > 0) {
+        const existingPhones = new Set(localLeads.map(l => l.phone));
+        sheetLeads.forEach(sl => {
+          if (sl.phone && !existingPhones.has(sl.phone) && !memoryDeletedIds.has(sl.id)) {
+            localLeads.push(sl);
+            existingPhones.add(sl.phone);
+          }
+        });
+        saveLeads(localLeads);
+      }
+    } catch (gsErr) {}
+
+    res.json({ ok: true, leads: localLeads.filter(l => !memoryDeletedIds.has(l.id)) });
   } catch (err) {
     res.status(500).json({ ok: false, error: 'Không thể tải danh sách khách đăng ký.' });
+  }
+});
+
+// API: Sync All Leads from Frontend Master Storage (Admin Only)
+app.post('/api/leads/sync-all', checkAdminAuth, (req, res) => {
+  try {
+    const { leads: clientLeads } = req.body || {};
+    if (Array.isArray(clientLeads) && clientLeads.length > 0) {
+      let currentLeads = getLeads();
+      const existingKeys = new Set(currentLeads.map(l => (l.phone || '') + '_' + (l.full_name || '')));
+      
+      clientLeads.forEach(cl => {
+        const key = (cl.phone || '') + '_' + (cl.full_name || '');
+        if (!existingKeys.has(key) && !memoryDeletedIds.has(cl.id)) {
+          currentLeads.push(cl);
+          existingKeys.add(key);
+        }
+      });
+      saveLeads(currentLeads);
+    }
+    res.json({ ok: true, total: getLeads().length });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'Lỗi đồng bộ dữ liệu.' });
   }
 });
 
@@ -315,4 +380,3 @@ if (require.main === module) {
     console.log(`====================================================`);
   });
 }
-

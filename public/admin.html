@@ -389,8 +389,24 @@
   let filter = "";
   let pendingRender = false;
 
-  const LS_DELETED_KEY = "bm_crm_deleted_ids";
-  const LS_OVERRIDES_KEY = "bm_crm_overrides";
+  const LS_MASTER_KEY = "bm_crm_master_leads_v2";
+  const LS_DELETED_KEY = "bm_crm_deleted_ids_v2";
+  const LS_OVERRIDES_KEY = "bm_crm_overrides_v2";
+
+  function getMasterLeads() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(LS_MASTER_KEY) || "[]");
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveMasterLeads(list) {
+    try {
+      localStorage.setItem(LS_MASTER_KEY, JSON.stringify(list));
+    } catch (e) {}
+  }
 
   function getDeletedIds() {
     try {
@@ -445,11 +461,60 @@
     toast._t = setTimeout(() => t.classList.remove("show"), 4500);
   }
 
+  // Cross-tab Realtime Sync
+  function handleIncomingLead(lead) {
+    if (!lead || !lead.id) return;
+    const deletedIds = getDeletedIds();
+    if (deletedIds.has(lead.id)) return;
+
+    const master = getMasterLeads();
+    const exists = master.some(l => l.id === lead.id || (l.phone && l.phone === lead.phone && l.full_name === lead.full_name));
+    if (!exists) {
+      master.unshift(lead);
+      saveMasterLeads(master);
+      fresh.add(lead.id);
+      leads = master;
+      toast(`🔔 Khách đăng ký mới tức thì: ${lead.full_name} (${lead.phone})`);
+      safeRender();
+    }
+  }
+
+  try {
+    const ch = new BroadcastChannel("bm_crm_channel");
+    ch.onmessage = (e) => {
+      if (e.data && e.data.type === "new_lead" && e.data.lead) {
+        handleIncomingLead(e.data.lead);
+      }
+    };
+  } catch (e) {}
+
+  window.addEventListener("storage", (e) => {
+    if (e.key === "bm_latest_lead" && e.newValue) {
+      try {
+        const lead = JSON.parse(e.newValue);
+        handleIncomingLead(lead);
+      } catch (err) {}
+    }
+  });
+
   async function load(silent) {
     if (!silent) {
       $("loginMsg").textContent = "Đang kiểm tra thông tin...";
       $("loginMsg").className = "msg";
     }
+
+    const deletedIds = getDeletedIds();
+    const overrides = getOverrides();
+    const localSaved = getMasterLeads();
+
+    // 1. Offline-First: If we have cached leads in local storage, render them immediately so user never sees empty screen
+    if (localSaved.length > 0 && (!leads || leads.length === 0)) {
+      leads = localSaved
+        .filter(l => !deletedIds.has(l.id))
+        .map(l => overrides[l.id] ? Object.assign({}, l, overrides[l.id]) : l);
+      safeRender();
+    }
+
     try {
       const res = await fetch("/api/leads", {
         headers: { "x-admin-password": pw },
@@ -459,8 +524,6 @@
       if (!res.ok || !data.ok) throw new Error(data.error || "Mật khẩu không chính xác.");
 
       const rawLeads = data.leads || [];
-      const deletedIds = getDeletedIds();
-      const overrides = getOverrides();
 
       // If server returned any lead that was previously deleted locally, sync tombstone to server
       const resurrected = rawLeads.filter(l => deletedIds.has(l.id));
@@ -472,13 +535,49 @@
         }).catch(() => {});
       }
 
-      // Filter out deleted leads and apply local overrides
-      leads = rawLeads.filter(l => !deletedIds.has(l.id)).map(l => {
-        if (overrides[l.id]) {
-          return Object.assign({}, l, overrides[l.id]);
+      // 2. Smart Hybrid Merge: Combine server leads with local master database
+      const mergedMap = new Map();
+
+      // Seed local saved leads first
+      localSaved.forEach(l => {
+        if (!deletedIds.has(l.id)) {
+          const key = (l.phone || '') + '_' + (l.full_name || '');
+          mergedMap.set(key, l);
         }
-        return l;
       });
+
+      // Merge server leads
+      rawLeads.forEach(sl => {
+        if (!deletedIds.has(sl.id)) {
+          const key = (sl.phone || '') + '_' + (sl.full_name || '');
+          const existing = mergedMap.get(key);
+          if (existing) {
+            mergedMap.set(key, Object.assign({}, existing, sl));
+          } else {
+            mergedMap.set(key, sl);
+          }
+        }
+      });
+
+      // Apply overrides and filter deleted
+      const mergedList = Array.from(mergedMap.values())
+        .filter(l => !deletedIds.has(l.id))
+        .map(l => overrides[l.id] ? Object.assign({}, l, overrides[l.id]) : l);
+
+      // Sort newest first
+      mergedList.sort((a, b) => new Date(b.received_at || 0) - new Date(a.received_at || 0));
+
+      leads = mergedList;
+      saveMasterLeads(leads);
+
+      // 3. Re-hydrate serverless container if local storage has more leads than freshly booted server
+      if (leads.length > rawLeads.length) {
+        fetch("/api/leads/sync-all", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-admin-password": pw },
+          body: JSON.stringify({ leads })
+        }).catch(() => {});
+      }
 
       if (seen) {
         const added = leads.filter((l) => !seen.has(l.id));
@@ -524,6 +623,7 @@
     saveOverride(id, patch);
     const idx = leads.findIndex((l) => l.id === id);
     if (idx >= 0) leads[idx] = Object.assign({}, leads[idx], patch);
+    saveMasterLeads(leads);
     toast("✅ Đã cập nhật trạng thái CRM");
     safeRender();
 
@@ -544,6 +644,7 @@
     // Save to local deleted list immediately so it will never reappear
     saveDeletedId(id);
     leads = leads.filter(l => l.id !== id);
+    saveMasterLeads(leads);
     toast("🗑️ Đã xóa vĩnh viễn: " + name);
     render();
 
@@ -670,18 +771,29 @@
   $("cleanTestBtn").addEventListener("click", async () => {
     const isTest = (l) => {
       const txt = [l.full_name, l.email, l.phone, l.company, l.note].join(" ").toLowerCase();
-      return txt.includes("test") || (l.email && l.email.endsWith("@example.com")) || l.phone === "0987654321" || l.id.startsWith("lead-");
+      // Only match sample seed leads and dummy sample data
+      return (
+        l.id.startsWith("bm-lead-100") ||
+        l.phone === "0988123456" ||
+        l.phone === "0909654321" ||
+        l.phone === "0912348899" ||
+        l.phone === "0938776655" ||
+        l.phone === "0987654321" ||
+        txt.includes("dữ liệu mẫu") ||
+        txt.includes("test lead")
+      );
     };
     const testList = leads.filter(isTest);
     if (!testList.length) {
-      toast("ℹ️ Hiện không tìm thấy dữ liệu test nào cần dọn dẹp.");
+      toast("ℹ️ Hiện không tìm thấy dữ liệu mẫu nào cần dọn dẹp.");
       return;
     }
-    if (!confirm(`Bạn có chắc muốn xóa đồng loạt ${testList.length} khách test này không?`)) return;
+    if (!confirm(`Bạn có chắc muốn xóa đồng loạt ${testList.length} dữ liệu mẫu (test data) này không?`)) return;
     
     testList.forEach(l => saveDeletedId(l.id));
     leads = leads.filter(l => !isTest(l));
-    toast(`🗑️ Đã xóa sạch ${testList.length} dữ liệu test!`);
+    saveMasterLeads(leads);
+    toast(`🗑️ Đã dọn dẹp sạch ${testList.length} dữ liệu mẫu!`);
     render();
 
     try {

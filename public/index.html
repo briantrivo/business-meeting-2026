@@ -2767,6 +2767,16 @@
             if (!res.ok || out.ok === false) {
               throw new Error(out.error || ("Lỗi kết nối HTTP " + res.status));
             }
+            
+            // Broadcast and store locally for instant CRM pickup
+            const savedLead = out.lead || Object.assign({ id: "reg-" + Date.now(), received_at: new Date().toISOString() }, payload);
+            try {
+              localStorage.setItem("bm_latest_lead", JSON.stringify(savedLead));
+              const ch = new BroadcastChannel("bm_crm_channel");
+              ch.postMessage({ type: "new_lead", lead: savedLead });
+              ch.close();
+            } catch (e) {}
+
             form.reset();
             setStatus("🎉 Đăng ký thành công! Ban tổ chức sẽ liên hệ với Quý khách trong 24 giờ.", "ok");
           } catch (err) {
